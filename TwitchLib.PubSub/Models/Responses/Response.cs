@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using TwitchLib.PubSub.Common;
 
 namespace TwitchLib.PubSub.Models.Responses
 {
@@ -31,8 +32,8 @@ namespace TwitchLib.PubSub.Models.Responses
         /// <param name="json">The json.</param>
         public Response(string json)
         {
-            Error = JObject.Parse(json).SelectToken("error")?.ToString();
-            Nonce = JObject.Parse(json).SelectToken("nonce")?.ToString();
+            Error = Helpers.ParseJson(json).SelectToken("error")?.ToString();
+            Nonce = Helpers.ParseJson(json).SelectToken("nonce")?.ToString();
             if (string.IsNullOrWhiteSpace(Error))
                 Successful = true;
         }

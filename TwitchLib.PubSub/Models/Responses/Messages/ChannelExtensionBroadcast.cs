@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using TwitchLib.PubSub.Common;
 
 namespace TwitchLib.PubSub.Models.Responses.Messages
 {
@@ -23,7 +24,7 @@ namespace TwitchLib.PubSub.Models.Responses.Messages
         /// <param name="jsonStr">The json string.</param>
         public ChannelExtensionBroadcast(string jsonStr)
         {
-            var json = JObject.Parse(jsonStr);
+            var json = Helpers.ParseJson(jsonStr);
             foreach (var msg in json["content"])
                 Messages.Add(msg.ToString());
         }

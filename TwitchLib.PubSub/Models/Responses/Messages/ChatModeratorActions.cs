@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using TwitchLib.PubSub.Common;
 
 namespace TwitchLib.PubSub.Models.Responses.Messages
 {
@@ -48,7 +49,7 @@ namespace TwitchLib.PubSub.Models.Responses.Messages
         /// <param name="jsonStr">The json string.</param>
         public ChatModeratorActions(string jsonStr)
         {
-            var json = JObject.Parse(jsonStr).SelectToken("data");
+            var json = Helpers.ParseJson(jsonStr).SelectToken("data");
             Type = json.SelectToken("type")?.ToString();
             ModerationAction = json.SelectToken("moderation_action")?.ToString();
             if (json.SelectToken("args") != null)

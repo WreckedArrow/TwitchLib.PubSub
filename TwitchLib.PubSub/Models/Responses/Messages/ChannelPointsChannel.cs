@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using TwitchLib.PubSub.Common;
 using TwitchLib.PubSub.Enums;
 using TwitchLib.PubSub.Models.Responses.Messages.Redemption;
 
@@ -26,7 +27,7 @@ namespace TwitchLib.PubSub.Models.Responses.Messages
         public ChannelPointsChannel(string jsonStr)
         {
             RawData = jsonStr;
-            JToken json = JObject.Parse(jsonStr);
+            JToken json = Helpers.ParseJson(jsonStr);
             switch(json.SelectToken("type").ToString())
             {
                 case "reward-redeemed":

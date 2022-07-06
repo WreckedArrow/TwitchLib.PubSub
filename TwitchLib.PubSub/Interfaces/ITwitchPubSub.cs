@@ -17,6 +17,14 @@ namespace TwitchLib.PubSub.Interfaces
         /// </summary>
         event EventHandler<OnBitsReceivedArgs> OnBitsReceived;
         /// <summary>
+        /// Occurs when [on bits received].
+        /// </summary>
+        event EventHandler<OnBitsReceivedV2Args> OnBitsReceivedV2;
+        /// <summary>
+        /// Fires when PubSub receives a message indicating a channel points reward was redeemed.
+        /// </summary>
+        event EventHandler<OnChannelPointsRewardRedeemedArgs> OnChannelPointsRewardRedeemed;
+        /// <summary>
         /// Occurs when [on channel extension broadcast].
         /// </summary>
         event EventHandler<OnChannelExtensionBroadcastArgs> OnChannelExtensionBroadcast;
@@ -47,7 +55,7 @@ namespace TwitchLib.PubSub.Interfaces
         /// <summary>
         /// Occurs when [on message deleted].
         /// </summary>
-        event EventHandler<OnMessageDeletedArgs> OnMessageDeleted; 
+        event EventHandler<OnMessageDeletedArgs> OnMessageDeleted;
         /// <summary>
         /// Occurs when [on listen response].
         /// </summary>
@@ -143,7 +151,7 @@ namespace TwitchLib.PubSub.Interfaces
         /// <summary>
         /// Occurs when [on raid go]
         /// </summary>
-        event EventHandler<OnRaidGoArgs> OnRaidGo; 
+        event EventHandler<OnRaidGoArgs> OnRaidGo;
         /// <summary>
         /// Occurs when [on log].
         /// </summary>
@@ -155,7 +163,95 @@ namespace TwitchLib.PubSub.Interfaces
         /// <summary>
         /// Occurs when [on prediction].
         /// </summary>
-        event EventHandler<OnPredictionArgs> OnPrediction;
+        event EventHandler<OnPredictionArgs> OnPredictionCreated;
+        /// <summary>
+        /// Occurs when [on prediction].
+        /// </summary>
+        event EventHandler<OnPredictionArgs> OnPredictionUpdated;
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        event EventHandler<OnStreamChatHostTargetChange> OnStreamChatHostTargetChange;
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        event EventHandler<OnStreamChatRichEmbed> OnStreamChatRichEmbed;
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        event EventHandler<OnStreamChatUpdatedRoom> OnStreamChatUpdatedRoom;
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        event EventHandler<OnGiftSubArgs> OnCommunitySub;
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        event EventHandler<OnCreatorGoalUpdateArgs> OnCreatorGoalUpdate;
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        event EventHandler<OnBroadcastSettingsUpdateArgs> OnBroadcastSettingsUpdate;
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        event EventHandler<OnPollEventArgs> OnPollCreated;
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        event EventHandler<OnPollEventArgs> OnPollUpdated;
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        event EventHandler<OnPollEventArgs> OnPollCompleted;
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        event EventHandler<OnPollEventArgs> OnPollArchived;
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        event EventHandler<OnPollEventArgs> OnPollTerminated;
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        event EventHandler<OnAdsEventArgs> OnAdsMidroll;
+        /// <summary>
+        /// Fires when Automod updates a held message.
+        /// </summary>
+        event EventHandler<OnAutomodCaughtMessageArgs> OnAutomodCaughtMessage;
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        event EventHandler<OnAutomodCaughtUserMessage> OnAutomodCaughtUserMessage;
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        event EventHandler<OnHypeTrainApproachingArgs> OnHypeTrainApproaching;
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        event EventHandler<OnHypeTrainStartArgs> OnHypeTrainStarted;
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        event EventHandler<OnHypeTrainProgressionArgs> OnHypeTrainProgression;
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        event EventHandler<OnHypeTrainLevelUpArgs> OnHypeTrainLevelUp;
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        event EventHandler<OnHypeTrainConductorUpdateArgs> OnHypeTrainConductorUpdate;
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        event EventHandler<OnHypeTrainEndArgs> OnHypeTrainEnd;
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        event EventHandler<OnHypeTrainCooldownExpirationArgs> OnHypeTrainCooldownExpiration;
 
         /// <summary>
         /// Connects this instance.
@@ -182,6 +278,17 @@ namespace TwitchLib.PubSub.Interfaces
         /// <param name="myTwitchId">My twitch identifier.</param>
         /// <param name="channelTwitchId">The channel twitch identifier.</param>
         void ListenToChatModeratorActions(string myTwitchId, string channelTwitchId);
+        /// <summary>
+        /// Listens to chat moderator actions.
+        /// </summary>
+        /// <param name="myTwitchId">My twitch identifier.</param>
+        /// <param name="channelTwitchId">The channel twitch identifier.</param>
+        void ListenToUserModerationNotifications(string myTwitchId, string channelTwitchId);
+        // /// <summary>
+        // /// Listens to commerce events.
+        // /// </summary>
+        // /// <param name="channelTwitchId">The channel twitch identifier.</param>
+        // void ListenToCommerce(string channelTwitchId);
         /// <summary>
         /// Listens to follows.
         /// </summary>
@@ -218,9 +325,59 @@ namespace TwitchLib.PubSub.Interfaces
         /// <param name="channelTwitchId">The channel twitch identifier.</param>
         void ListenToRaid(string channelTwitchId);
         /// <summary>
-        /// Listens to predictions
+        /// Sends request to listen to bits events in specific channel
         /// </summary>
-        /// <param name="channelTwitchId">The channel twitch identifier.</param>
+        /// <param name="myTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        void ListenToUserBitsEvents(string myTwitchId);
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        void ListenToHypeTrain(string channelTwitchId);
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        void ListenToCreatorGoals(string channelTwitchId);
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        void ListenToCommunityBoost(string channelTwitchId);
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        void ListenToDrops(string channelTwitchId);
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        void ListenToSubGifts(string channelTwitchId);
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        void ListenToCheers(string channelTwitchId);
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        void ListenToBountyBoardEvents(string channelTwitchId);
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        void ListenToStreamChatRoom(string channelTwitchId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToPoll(string channelTwitchId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
         void ListenToPredictions(string channelTwitchId);
         /// <summary>
         /// Sends the topics.
@@ -233,5 +390,80 @@ namespace TwitchLib.PubSub.Interfaces
         /// </summary>
         /// <param name="testJsonString">The test json string.</param>
         void TestMessageParser(string testJsonString);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToPresence(string userId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToAds(string channelId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToStreamChange(string channelId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToBroadcastSettingsUpdate(string channelId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToWatchParty(string channelId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToExtensionControlByChannel(string channelId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToRadioEvents(string channelId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToOnsiteNotifications(string userId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToUserProperties(string userId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToUnbanRequests(string userId, string channelId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToChatroomUser(string userId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToLowTrustUsers(string userId, string channelId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToUserCampaignEvents(string userId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToCommunityMoments(string channelId);
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        void ListenToPrivateCallout(string userId, string channelId);
     }
 }

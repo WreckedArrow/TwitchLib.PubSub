@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
+using TwitchLib.PubSub.Common;
 using TwitchLib.PubSub.Enums;
 
 namespace TwitchLib.PubSub.Models.Responses.Messages
@@ -35,7 +36,7 @@ namespace TwitchLib.PubSub.Models.Responses.Messages
         /// <param name="jsonStr"></param>
         public LeaderboardEvents(string jsonStr)
         {
-            JToken json = JObject.Parse(jsonStr);
+            JToken json = Helpers.ParseJson(jsonStr);
             switch (json.SelectToken("identifier.domain").ToString())
             {
                 case "bits-usage-by-channel-v1":

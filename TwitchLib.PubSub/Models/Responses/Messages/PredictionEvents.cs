@@ -1,74 +1,165 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
+using TwitchLib.PubSub.Common;
 using TwitchLib.PubSub.Enums;
-using TwitchLib.PubSub.Extensions;
 
 namespace TwitchLib.PubSub.Models.Responses.Messages
 {
-    /// <summary>
-    /// Predictions model constructor.
-    /// Implements the <see cref="MessageData" />
-    /// </summary>
-    /// <seealso cref="MessageData" />
-    /// <inheritdoc />
     public class PredictionEvents : MessageData
     {
-        /// <summary>
-        /// Prediction Type
-        /// </summary>
-        /// <value>The type</value>
-        public PredictionType Type { get; protected set; }
-        /// <summary>
-        /// Prediction Id
-        /// </summary>
-        /// <value>The id</value>
-        public Guid Id { get; protected set; }
-        /// <summary>
-        /// Channel Id
-        /// </summary>
-        /// <value>The channel id</value>
-        public string ChannelId { get; protected set; }
-        /// <summary>
-        /// Created At
-        /// </summary>
-        /// <value>The time of creation</value>
-        public DateTime? CreatedAt { get; protected set; }
-        /// <summary>
-        /// Locked At
-        /// </summary>
-        /// <value>The time of lock</value>
-        public DateTime? LockedAt { get; protected set; }
-        /// <summary>
-        /// Ended At
-        /// </summary>
-        /// <value>The time of ending</value>
-        public DateTime? EndedAt { get; protected set; }
-        /// <summary>
-        /// Outcome
-        /// </summary>
-        /// <value>The outcomes</value>
-        public ICollection<Outcome> Outcomes { get; protected set; } = new List<Outcome>();
-        /// <summary>
-        /// Prediction Status
-        /// </summary>
-        /// <value>The status</value>
-        public PredictionStatus Status { get; protected set; }
-        /// <summary>
-        /// Title
-        /// </summary>
-        /// <value>The title</value>
-        public string Title { get; protected set; }
-        /// <summary>
-        /// Wining Outcome Id
-        /// </summary>
-        /// <value>The id of the winning outcome</value>
-        public Guid? WinningOutcomeId { get; protected set; }
-        /// <summary>
-        /// Prediction time
-        /// </summary>
-        /// <value>The seconds the prediction runs, starts from <see cref="CreatedAt"/></value>
-        public int PredictionTime { get; protected set; }
+        [JsonProperty("type")]
+        [JsonConverter(typeof(StringEnumConverter))]
+        public PredictionType Type;
+
+        [JsonProperty("data")]
+        public PredictionData Data;
+
+        public class UserInfo
+        {
+            [JsonProperty("type")]
+            public string Type;
+
+            [JsonProperty("user_id")]
+            public string UserId;
+
+            [JsonProperty("user_display_name")]
+            public string UserDisplayName;
+
+            [JsonProperty("extension_client_id")]
+            public string ExtensionClientId;
+        }
+        public class PredictionResult
+        {
+            [JsonProperty("type")]
+            public string Type;
+
+            [JsonProperty("points_won")]
+            public int? PointsWon;
+
+            [JsonProperty("is_acknowledged")]
+            public bool IsAcknowledged;
+        }
+
+        public class TopPredictor
+        {
+            [JsonProperty("id")]
+            public string Id;
+
+            [JsonProperty("event_id")]
+            public string EventId;
+
+            [JsonProperty("outcome_id")]
+            public string OutcomeId;
+
+            [JsonProperty("channel_id")]
+            public string ChannelId;
+
+            [JsonProperty("points")]
+            public int Points;
+
+            [JsonProperty("predicted_at")]
+            public string PredictedAt;
+
+            [JsonProperty("updated_at")]
+            public string UpdatedAt;
+
+            [JsonProperty("user_id")]
+            public string UserId;
+
+            [JsonProperty("result")]
+            public PredictionResult Result;
+
+            [JsonProperty("user_display_name")]
+            public string UserDisplayName;
+        }
+
+        public class Badge
+        {
+            [JsonProperty("version")]
+            public string Version;
+
+            [JsonProperty("set_id")]
+            public string SetId;
+        }
+
+        public class Outcome
+        {
+            [JsonProperty("id")]
+            public Guid Id;
+
+            [JsonProperty("color")]
+            public string Color;
+
+            [JsonProperty("title")]
+            public string Title;
+
+            [JsonProperty("total_points")]
+            public long TotalPoints;
+
+            [JsonProperty("total_users")]
+            public long TotalUsers;
+
+            [JsonProperty("top_predictors")]
+            public List<TopPredictor> TopPredictors;
+
+            [JsonProperty("badge")]
+            public Badge Badge;
+        }
+
+        public class Event
+        {
+            [JsonProperty("id")]
+            public Guid Id;
+
+            [JsonProperty("channel_id")]
+            public string ChannelId;
+
+            [JsonProperty("created_at")]
+            public DateTime? CreatedAt;
+
+            [JsonProperty("created_by")]
+            public UserInfo CreatedBy;
+
+            [JsonProperty("ended_at")]
+            public DateTime? EndedAt;
+
+            [JsonProperty("ended_by")]
+            public UserInfo EndedBy;
+
+            [JsonProperty("locked_at")]
+            public DateTime? LockedAt;
+
+            [JsonProperty("locked_by")]
+            public UserInfo LockedBy;
+
+            [JsonProperty("outcomes")]
+            public List<Outcome> Outcomes;
+
+            [JsonProperty("prediction_window_seconds")]
+            public int PredictionWindowSeconds;
+
+            [JsonProperty("status")]
+            [JsonConverter(typeof(StringEnumConverter))]
+            public PredictionStatus Status;
+
+            [JsonProperty("title")]
+            public string Title;
+
+            [JsonProperty("winning_outcome_id")]
+            public Guid? WinningOutcomeId;
+        }
+
+        public class PredictionData
+        {
+            [JsonProperty("timestamp")]
+            public string Timestamp;
+
+            [JsonProperty("event")]
+            public Event Event;
+        }
 
         /// <summary>
         /// PredictionEvents constructor.
@@ -76,40 +167,9 @@ namespace TwitchLib.PubSub.Models.Responses.Messages
         /// <param name="jsonStr"></param>
         public PredictionEvents(string jsonStr)
         {
-            var json = JObject.Parse(jsonStr);
-            Type = (PredictionType) Enum.Parse(typeof(PredictionType), json.SelectToken("type").ToString().Replace("-", ""), true);
-            var eventData = json.SelectToken("data.event");
-            Id = Guid.Parse(eventData.SelectToken("id").ToString());
-            ChannelId = eventData.SelectToken("channel_id").ToString();
-            CreatedAt = (eventData.SelectToken("created_at").IsEmpty()) ? (DateTime?) null : DateTime.Parse(eventData.SelectToken("created_at").ToString());
-            EndedAt = (eventData.SelectToken("ended_at").IsEmpty()) ? (DateTime?) null : DateTime.Parse(eventData.SelectToken("ended_at").ToString());
-            LockedAt = (eventData.SelectToken("locked_at").IsEmpty()) ? (DateTime?) null : DateTime.Parse(eventData.SelectToken("locked_at").ToString());
-            Status = (PredictionStatus) Enum.Parse(typeof(PredictionStatus), eventData.SelectToken("status").ToString().Replace("_", ""), true);
-            Title = eventData.SelectToken("title").ToString();
-            WinningOutcomeId = (eventData.SelectToken("winning_outcome_id").IsEmpty()) ? (Guid?) null : Guid.Parse(eventData.SelectToken("winning_outcome_id").ToString());
-            PredictionTime = int.Parse(eventData.SelectToken("prediction_window_seconds").ToString());
-
-            foreach (JToken outcome in eventData.SelectToken("outcomes").Children())
-            {
-                Outcome outcomeToAdd = new Outcome
-                {
-                    Id = Guid.Parse(outcome.SelectToken("id").ToString()),
-                    Color = outcome.SelectToken("color").ToString(),
-                    Title = outcome.SelectToken("title").ToString(),
-                    TotalPoints = long.Parse(outcome.SelectToken("total_points").ToString()),
-                    TotalUsers = long.Parse(outcome.SelectToken("total_users").ToString()),
-                };
-                foreach (JToken topPredictors in outcome.SelectToken("top_predictors").Children())
-                {
-                    outcomeToAdd.TopPredictors.Add(new Outcome.Predictor
-                    {
-                        DisplayName = topPredictors.SelectToken("user_display_name").ToString(),
-                        Points = int.Parse(topPredictors.SelectToken("points").ToString()),
-                        UserId = topPredictors.SelectToken("user_id").ToString()
-                    });
-                }
-                Outcomes.Add(outcomeToAdd);
-            }
+            var json = Helpers.ParseJson(jsonStr);
+            Type = Helpers.ToEnum<PredictionType>(json.SelectToken("type").ToString());
+            Data = json.SelectToken("data").ToObject<PredictionData>();
         }
     }
 }

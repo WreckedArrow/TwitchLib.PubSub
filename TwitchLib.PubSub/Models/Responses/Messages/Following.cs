@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json.Linq;
+using TwitchLib.PubSub.Common;
 
 namespace TwitchLib.PubSub.Models.Responses.Messages
 {
@@ -37,7 +38,7 @@ namespace TwitchLib.PubSub.Models.Responses.Messages
         /// <param name="jsonStr">The json string.</param>
         public Following(string jsonStr)
         {
-            var json = JObject.Parse(jsonStr);
+            var json = Helpers.ParseJson(jsonStr);
             DisplayName = json["display_name"].ToString();
             Username = json["username"].ToString();
             UserId = json["user_id"].ToString();

@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
+using TwitchLib.PubSub.Common;
 
 namespace TwitchLib.PubSub.Models.Responses.Messages
 {
@@ -109,7 +110,7 @@ namespace TwitchLib.PubSub.Models.Responses.Messages
         /// <exception cref="ArgumentOutOfRangeException"></exception>
         public ChannelSubscription(string jsonStr)
         {
-            var message = JObject.Parse(jsonStr);
+            var message = Helpers.ParseJson(jsonStr);
             Username = message.SelectToken("user_name")?.ToString();
             DisplayName = message.SelectToken("display_name")?.ToString();
             RecipientName = message.SelectToken("recipient_user_name")?.ToString();

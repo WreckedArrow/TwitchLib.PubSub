@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using TwitchLib.PubSub.Common;
 using TwitchLib.PubSub.Enums;
 
 namespace TwitchLib.PubSub.Models.Responses.Messages
@@ -44,7 +45,7 @@ namespace TwitchLib.PubSub.Models.Responses.Messages
         /// <param name="jsonStr">The json string.</param>
         public Whisper(string jsonStr)
         {
-            var json = JObject.Parse(jsonStr);
+            var json = Helpers.ParseJson(jsonStr);
             Type = json.SelectToken("type").ToString();
             Data = json.SelectToken("data").ToString();
             switch (Type)

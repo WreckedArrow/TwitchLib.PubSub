@@ -1,5 +1,6 @@
 ﻿using System;
 using Newtonsoft.Json.Linq;
+using TwitchLib.PubSub.Common;
 using TwitchLib.PubSub.Enums;
 
 namespace TwitchLib.PubSub.Models.Responses.Messages
@@ -74,7 +75,7 @@ namespace TwitchLib.PubSub.Models.Responses.Messages
         /// <param name="jsonStr">The json string.</param>
         public RaidEvents(string jsonStr)
         {
-            JToken json = JObject.Parse(jsonStr);
+            JToken json = Helpers.ParseJson(jsonStr);
             switch (json.SelectToken("type").ToString())
             {                
                 case "raid_update":

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using TwitchLib.PubSub.Enums;
 using TwitchLib.PubSub.Models;
-using static TwitchLib.PubSub.Models.Responses.Messages.PredictionEvents;
+using TwitchLib.PubSub.Models.Responses.Messages;
 
 namespace TwitchLib.PubSub.Events
 {
@@ -10,20 +10,17 @@ namespace TwitchLib.PubSub.Events
     /// <summary>
     /// Class representing arguments of on prediction event.
     /// </summary>
-    public class OnPredictionArgs : EventArgs
+    public class OnBroadcastSettingsUpdateArgs : EventArgs
     {
+        /// <summary>
+        /// The channel Id it came from
+        /// </summary>
+        /// <value>The channel id</value>
+        public string ChannelId;
         /// <summary>
         /// Property representing the the prediction type
         /// </summary>
-        public PredictionType Type;
+        public BroadcastSettingsUpdateEvent BroadcastSettingsUpdateEvent;
 
-        /// <summary>
-        /// Property representing the the prediction Id
-        /// </summary>
-        public Guid Id;
-
-        public string ChannelId;
-
-        public PredictionData Data;
     }
 }

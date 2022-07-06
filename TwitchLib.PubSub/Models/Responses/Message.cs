@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using TwitchLib.PubSub.Common;
+using TwitchLib.PubSub.Enums;
 using TwitchLib.PubSub.Models.Responses.Messages;
 using TwitchLib.PubSub.Models.Responses.Messages.AutomodCaughtMessage;
 using TwitchLib.PubSub.Models.Responses.Messages.UserModerationNotifications;
@@ -27,56 +29,80 @@ namespace TwitchLib.PubSub.Models.Responses
         /// <param name="jsonStr">The json string.</param>
         public Message(string jsonStr)
         {
-            var json = JObject.Parse(jsonStr).SelectToken("data");
+            var json = Helpers.ParseJson(jsonStr).SelectToken("data");
             Topic = json.SelectToken("topic")?.ToString();
             var encodedJsonMessage = json.SelectToken("message").ToString();
             switch (Topic?.Split('.')[0])
             {
-                case "user-moderation-notifications":
+                case MessageTopic.UserModerationNotifications:
                     MessageData = new UserModerationNotifications(encodedJsonMessage);
                     break;
-                case "automod-queue":
+                case MessageTopic.AutomodQueue:
                     MessageData = new AutomodQueue(encodedJsonMessage);
                     break;
-                case "chat_moderator_actions":
+                case MessageTopic.ChatModeratorActions:
                     MessageData = new ChatModeratorActions(encodedJsonMessage);
                     break;
-                case "channel-bits-events-v1":
+                case MessageTopic.ChannelBitsEventsV1:
                     MessageData = new ChannelBitsEvents(encodedJsonMessage);
                     break;
-                case "channel-bits-events-v2":
+                case MessageTopic.ChannelBitsEventsV2:
                     encodedJsonMessage = encodedJsonMessage.Replace("\\", "");
-                    var dataEncoded = JObject.Parse(encodedJsonMessage)["data"].ToString();
+                    var dataEncoded = Helpers.ParseJson(encodedJsonMessage)["data"].ToString();
                     MessageData = JsonConvert.DeserializeObject<ChannelBitsEventsV2>(dataEncoded);
                     break;
-                case "video-playback-by-id":
+                case MessageTopic.VideoPlaybackById:
                     MessageData = new VideoPlayback(encodedJsonMessage);
                     break;
-                case "whispers":
+                case MessageTopic.HypeTrainEventsV1:
+                    MessageData = new HypeTrainEvent(encodedJsonMessage);
+                    break;
+                case MessageTopic.Whispers:
                     MessageData = new Whisper(encodedJsonMessage);
                     break;
-                case "channel-subscribe-events-v1":
+                // case MessageTopic.ChannelCommerceEventsV1:
+                //     MessageData = new ChannelCommerceEvents(encodedJsonMessage);
+                //     break;
+                case MessageTopic.ChannelSubscribeEventsV1:
                     MessageData = new ChannelSubscription(encodedJsonMessage);
                     break;
-                case "channel-ext-v1":
+                case MessageTopic.StreamChatRoomV1:
+                    MessageData = new StreamChatEvent(encodedJsonMessage);
+                    break;
+                case MessageTopic.ChannelExtV1:
                     MessageData = new ChannelExtensionBroadcast(encodedJsonMessage);
                     break;
-                case "following":
+                case MessageTopic.Following:
                     MessageData = new Following(encodedJsonMessage);
                     break;
-                case "community-points-channel-v1":
+                case MessageTopic.CommunityPointsChannelV1:
                     MessageData = new CommunityPointsChannel(encodedJsonMessage);
                     break;
-                case "channel-points-channel-v1":
+                case MessageTopic.ChannelPointsChannelV1:
                     MessageData = new ChannelPointsChannel(encodedJsonMessage);
                     break;
-                case "leaderboard-events-v1":
+                case MessageTopic.LeaderboardEventsV1:
                     MessageData = new LeaderboardEvents(encodedJsonMessage);
                     break;
-                case "raid":
+                case MessageTopic.ChannelSubGiftsV1:
+                    MessageData = new GiftSubEvent(encodedJsonMessage);
+                    break;
+                case MessageTopic.BroadcastSettingsUpdate:
+                    MessageData = new BroadcastSettingsUpdateEvent(encodedJsonMessage);
+                    break;
+                case MessageTopic.Polls:
+                    MessageData = new PollsEvent(encodedJsonMessage);
+                    break;
+                case MessageTopic.Ads:
+                    MessageData = new AdsEvent(encodedJsonMessage);
+                    break;
+                case MessageTopic.CreatorGoalsEventsV1:
+                    MessageData = new CreatorGoalsEvent(encodedJsonMessage);
+                    break;
+                case MessageTopic.Raid:
                     MessageData = new RaidEvents(encodedJsonMessage);
-                    break;                
-                case "predictions-channel-v1":
+                    break;
+                case MessageTopic.PredictionsChannelV1:
                     MessageData = new PredictionEvents(encodedJsonMessage);
                     break;
             }

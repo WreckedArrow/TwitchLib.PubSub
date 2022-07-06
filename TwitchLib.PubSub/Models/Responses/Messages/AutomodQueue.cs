@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using TwitchLib.PubSub.Common;
 using TwitchLib.PubSub.Enums;
 
 namespace TwitchLib.PubSub.Models.Responses.Messages
@@ -25,7 +26,7 @@ namespace TwitchLib.PubSub.Models.Responses.Messages
         public AutomodQueue(string jsonStr)
         {
             RawData = jsonStr;
-            JToken json = JObject.Parse(jsonStr);
+            JToken json = Helpers.ParseJson(jsonStr);
             switch (json.SelectToken("type").ToString())
             {
                 case "automod_caught_message":

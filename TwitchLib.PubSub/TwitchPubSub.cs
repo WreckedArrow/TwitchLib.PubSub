@@ -9,6 +9,7 @@ using TwitchLib.Communication.Clients;
 using TwitchLib.Communication.Enums;
 using TwitchLib.Communication.Events;
 using TwitchLib.Communication.Models;
+using TwitchLib.PubSub.Common;
 using TwitchLib.PubSub.Enums;
 using TwitchLib.PubSub.Events;
 using TwitchLib.PubSub.Interfaces;
@@ -262,7 +263,72 @@ namespace TwitchLib.PubSub
         /// <summary>
         /// Fires when PubSub receives notice that a prediction has started or updated.
         /// </summary>
-        public event EventHandler<OnPredictionArgs> OnPrediction;
+        public event EventHandler<OnPredictionArgs> OnPredictionCreated;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        public event EventHandler<OnPredictionArgs> OnPredictionUpdated;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        public event EventHandler<OnStreamChatHostTargetChange> OnStreamChatHostTargetChange;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        public event EventHandler<OnStreamChatRichEmbed> OnStreamChatRichEmbed;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        public event EventHandler<OnStreamChatUpdatedRoom> OnStreamChatUpdatedRoom;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        public event EventHandler<OnGiftSubArgs> OnCommunitySub;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        public event EventHandler<OnCreatorGoalUpdateArgs> OnCreatorGoalUpdate;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        public event EventHandler<OnBroadcastSettingsUpdateArgs> OnBroadcastSettingsUpdate;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        public event EventHandler<OnPollEventArgs> OnPollCreated;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        public event EventHandler<OnPollEventArgs> OnPollUpdated;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        public event EventHandler<OnPollEventArgs> OnPollCompleted;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        public event EventHandler<OnPollEventArgs> OnPollArchived;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        public event EventHandler<OnPollEventArgs> OnPollTerminated;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when PubSub receives notice that a prediction has started or updated.
+        /// </summary>
+        public event EventHandler<OnAdsEventArgs> OnAdsMidroll;
         /// <inheritdoc/>
         /// <summary>
         /// Fires when Automod updates a held message.
@@ -273,6 +339,41 @@ namespace TwitchLib.PubSub
         /// Fires when a moderation event hits a user
         /// </summary>
         public event EventHandler<OnAutomodCaughtUserMessage> OnAutomodCaughtUserMessage;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        public event EventHandler<OnHypeTrainApproachingArgs> OnHypeTrainApproaching;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        public event EventHandler<OnHypeTrainStartArgs> OnHypeTrainStarted;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        public event EventHandler<OnHypeTrainProgressionArgs> OnHypeTrainProgression;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        public event EventHandler<OnHypeTrainLevelUpArgs> OnHypeTrainLevelUp;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        public event EventHandler<OnHypeTrainConductorUpdateArgs> OnHypeTrainConductorUpdate;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        public event EventHandler<OnHypeTrainEndArgs> OnHypeTrainEnd;
+        /// <inheritdoc/>
+        /// <summary>
+        /// Fires when a moderation event hits a user
+        /// </summary>
+        public event EventHandler<OnHypeTrainCooldownExpirationArgs> OnHypeTrainCooldownExpiration;
         #endregion
 
         /// <summary>
@@ -393,12 +494,22 @@ namespace TwitchLib.PubSub
         /// <param name="message">The message.</param>
         private void ParseMessage(string message)
         {
-            var type = JObject.Parse(message).SelectToken("type")?.ToString();
+            var type = Helpers.ParseJson(message).SelectToken("type")?.ToString();
 
             switch (type?.ToLower())
             {
                 case "response":
-                    var resp = new Models.Responses.Response(message);
+                    Models.Responses.Response resp;
+                    try
+                    {
+                        resp = new Models.Responses.Response(message);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Error parsing response: {message}\n{ex}");
+                        break;
+                    }
+                    // var resp = new Models.Responses.Response(message);
                     if (_previousRequests.Count != 0)
                     {
                         bool handled = false;
@@ -430,14 +541,24 @@ namespace TwitchLib.PubSub
                     }
                     break;
                 case "message":
-                    var msg = new Models.Responses.Message(message);
+                    Models.Responses.Message msg;
+                    try
+                    {
+                        msg = new Models.Responses.Message(message);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError($"Error parsing message: {message}\n{ex}");
+                        break;
+                    }
+                    // var msg = new Models.Responses.Message(message);
                     _topicToChannelId.TryGetValue(msg.Topic, out var channelId);
                     channelId = channelId ?? "";
                     switch (msg.Topic.Split('.')[0])
                     {
-                        case "user-moderation-notifications":
+                        case MessageTopic.UserModerationNotifications:
                             var userModerationNotifications = msg.MessageData as UserModerationNotifications;
-                            switch(userModerationNotifications.Type)
+                            switch (userModerationNotifications.Type)
                             {
                                 case UserModerationNotificationsType.AutomodCaughtMessage:
                                     var automodCaughtMessage = userModerationNotifications.Data as Models.Responses.Messages.UserModerationNotificationsTypes.AutomodCaughtMessage;
@@ -447,7 +568,7 @@ namespace TwitchLib.PubSub
                                     break;
                             }
                             return;
-                        case "automod-queue":
+                        case MessageTopic.AutomodQueue:
                             var automodQueue = msg.MessageData as AutomodQueue;
                             switch (automodQueue.Type)
                             {
@@ -460,15 +581,15 @@ namespace TwitchLib.PubSub
                                     break;
                             }
                             return;
-                        case "channel-subscribe-events-v1":
+                        case MessageTopic.ChannelSubscribeEventsV1:
                             var subscription = msg.MessageData as ChannelSubscription;
                             OnChannelSubscription?.Invoke(this, new OnChannelSubscriptionArgs { Subscription = subscription, ChannelId = channelId });
                             return;
-                        case "whispers":
+                        case MessageTopic.Whispers:
                             var whisper = (Whisper)msg.MessageData;
                             OnWhisper?.Invoke(this, new OnWhisperArgs { Whisper = whisper, ChannelId = channelId });
                             return;
-                        case "chat_moderator_actions":
+                        case MessageTopic.ChatModeratorActions:
                             var cma = msg.MessageData as ChatModeratorActions;
                             var reason = "";
                             switch (cma?.ModerationAction.ToLower())
@@ -527,7 +648,7 @@ namespace TwitchLib.PubSub
                                     return;
                             }
                             break;
-                        case "channel-bits-events-v1":
+                        case MessageTopic.ChannelBitsEventsV1:
                             if (msg.MessageData is ChannelBitsEvents cbe)
                             {
                                 OnBitsReceived?.Invoke(this, new OnBitsReceivedArgs
@@ -545,7 +666,7 @@ namespace TwitchLib.PubSub
                                 return;
                             }
                             break;
-                        case "channel-bits-events-v2":
+                        case MessageTopic.ChannelBitsEventsV2:
                             if (msg.MessageData is ChannelBitsEventsV2 cbev2)
                             {
                                 OnBitsReceivedV2?.Invoke(this, new OnBitsReceivedV2Args
@@ -564,11 +685,31 @@ namespace TwitchLib.PubSub
                                 return;
                             }
                             break;
-                        case "channel-ext-v1":
+                        // case MessageTopic.ChannelCommerceEventsV1:
+                        //     if (msg.MessageData is ChannelCommerceEvents cce)
+                        //     {
+                        //         OnChannelCommerceReceived?.Invoke(this, new OnChannelCommerceReceivedArgs
+                        //         {
+
+                        //             Username = cce.Username,
+                        //             DisplayName = cce.DisplayName,
+                        //             ChannelName = cce.ChannelName,
+                        //             UserId = cce.UserId,
+                        //             ChannelId = cce.ChannelId,
+                        //             Time = cce.Time,
+                        //             ItemImageURL = cce.ItemImageURL,
+                        //             ItemDescription = cce.ItemDescription,
+                        //             SupportsChannel = cce.SupportsChannel,
+                        //             PurchaseMessage = cce.PurchaseMessage
+                        //         });
+                        //         return;
+                        //     }
+                        //     break;
+                        case MessageTopic.ChannelExtV1:
                             var cEB = msg.MessageData as ChannelExtensionBroadcast;
                             OnChannelExtensionBroadcast?.Invoke(this, new OnChannelExtensionBroadcastArgs { Messages = cEB.Messages, ChannelId = channelId });
                             return;
-                        case "video-playback-by-id":
+                        case MessageTopic.VideoPlaybackById:
                             var vP = msg.MessageData as VideoPlayback;
                             switch (vP?.Type)
                             {
@@ -586,12 +727,12 @@ namespace TwitchLib.PubSub
                                     return;
                             }
                             break;
-                        case "following":
+                        case MessageTopic.Following:
                             var f = (Following)msg.MessageData;
                             f.FollowedChannelId = msg.Topic.Split('.')[1];
                             OnFollow?.Invoke(this, new OnFollowArgs { FollowedChannelId = f.FollowedChannelId, DisplayName = f.DisplayName, UserId = f.UserId, Username = f.Username });
                             return;
-                        case "community-points-channel-v1":
+                        case MessageTopic.CommunityPointsChannelV1:
                             var cpc = msg.MessageData as CommunityPointsChannel;
                             switch (cpc?.Type)
                             {
@@ -609,9 +750,9 @@ namespace TwitchLib.PubSub
                                     return;
                             }
                             return;
-                        case "channel-points-channel-v1":
+                        case MessageTopic.ChannelPointsChannelV1:
                             var channelPointsChannel = msg.MessageData as ChannelPointsChannel;
-                            switch(channelPointsChannel.Type)
+                            switch (channelPointsChannel.Type)
                             {
                                 case ChannelPointsChannelType.RewardRedeemed:
                                     var rewardRedeemed = channelPointsChannel.Data as RewardRedeemed;
@@ -622,7 +763,7 @@ namespace TwitchLib.PubSub
                                     break;
                             }
                             return;
-                        case "leaderboard-events-v1":
+                        case MessageTopic.LeaderboardEventsV1:
                             var lbe = msg.MessageData as LeaderboardEvents;
                             switch (lbe?.Type)
                             {
@@ -634,7 +775,130 @@ namespace TwitchLib.PubSub
                                     return;
                             }
                             return;
-                        case "raid":
+                        case MessageTopic.ChannelSubGiftsV1:
+                            var giftSub = msg.MessageData as GiftSubEvent;
+                            switch (giftSub?.Type)
+                            {
+                                case GiftSubType.MysteryGiftPurchase:
+                                    OnCommunitySub?.Invoke(this, new OnGiftSubArgs { ChannelId = giftSub.ChannelId, Id = giftSub.Id, GiftSubEvent = giftSub });
+                                    return;
+                                case null:
+                                    UnaccountedFor("Gift Sub Type: null");
+                                    break;
+                                default:
+                                    UnaccountedFor($"Gift Sub Type: {giftSub.Type}");
+                                    break;
+                            }
+                            return;
+                        case MessageTopic.CreatorGoalsEventsV1:
+                            var creatorGoal = msg.MessageData as CreatorGoalsEvent;
+                            creatorGoal.ChannelId = msg.Topic.Split('.')[1];
+                            switch (creatorGoal?.Type)
+                            {
+                                case CreatorGoalEventType.GoalUpdated:
+                                    OnCreatorGoalUpdate?.Invoke(this, new OnCreatorGoalUpdateArgs { ChannelId = creatorGoal.ChannelId, GoalId = creatorGoal.GoalId, CreatorGoalsEvent = creatorGoal });
+                                    return;
+                                case null:
+                                    UnaccountedFor("Creator Goal Event Type: null");
+                                    break;
+                                default:
+                                    UnaccountedFor($"Creator Goal Event Type: {creatorGoal.Type}");
+                                    break;
+                            }
+                            return;
+                        case MessageTopic.HypeTrainEventsV1:
+                            var hypeTrain = msg.MessageData as HypeTrainEvent;
+                            var hypeTrainChannelId = msg.Topic.Split('.')[1];
+                            switch (hypeTrain?.Type)
+                            {
+                                case HypeTrainEventType.HypeTrainApproaching:
+                                    OnHypeTrainApproaching?.Invoke(this, new OnHypeTrainApproachingArgs { ChannelId = hypeTrainChannelId, HypeTrainId = hypeTrain.Approaching.ApproachingHypeTrainId, Data = hypeTrain.Approaching });
+                                    return;
+                                case HypeTrainEventType.HypeTrainStart:
+                                    OnHypeTrainStarted?.Invoke(this, new OnHypeTrainStartArgs { ChannelId = hypeTrainChannelId, HypeTrainId = hypeTrain.Start.Id, Data = hypeTrain.Start });
+                                    return;
+                                case HypeTrainEventType.HypeTrainProgression:
+                                    OnHypeTrainProgression?.Invoke(this, new OnHypeTrainProgressionArgs { ChannelId = hypeTrainChannelId, Data = hypeTrain.Progression });
+                                    return;
+                                case HypeTrainEventType.HypeTrainLevelUp:
+                                    OnHypeTrainLevelUp?.Invoke(this, new OnHypeTrainLevelUpArgs { ChannelId = hypeTrainChannelId, Data = hypeTrain.LevelUp });
+                                    return;
+                                case HypeTrainEventType.HypeTrainConductorUpdate:
+                                    OnHypeTrainConductorUpdate?.Invoke(this, new OnHypeTrainConductorUpdateArgs { ChannelId = hypeTrainChannelId, Data = hypeTrain.ConductorUpdate });
+                                    return;
+                                case HypeTrainEventType.HypeTrainEnd:
+                                    OnHypeTrainEnd?.Invoke(this, new OnHypeTrainEndArgs { ChannelId = hypeTrainChannelId, Data = hypeTrain.End });
+                                    return;
+                                case HypeTrainEventType.HypeTrainCooldownExpiration:
+                                    OnHypeTrainCooldownExpiration?.Invoke(this, new OnHypeTrainCooldownExpirationArgs { ChannelId = hypeTrainChannelId });
+                                    return;
+                                case null:
+                                    UnaccountedFor("Hype Train Event Type: null");
+                                    break;
+                                default:
+                                    UnaccountedFor($"Hype Train Event Type: {hypeTrain.Type}");
+                                    break;
+                            }
+                            return;
+                        case MessageTopic.BroadcastSettingsUpdate:
+                            var broadcastUpdate = msg.MessageData as BroadcastSettingsUpdateEvent;
+                            switch (broadcastUpdate?.Type)
+                            {
+                                case BroadcastSettingsUpdateType.BroadcastSettingsUpdate:
+                                    OnBroadcastSettingsUpdate?.Invoke(this, new OnBroadcastSettingsUpdateArgs { ChannelId = broadcastUpdate.ChannelId, BroadcastSettingsUpdateEvent = broadcastUpdate, });
+                                    return;
+                                case null:
+                                    UnaccountedFor("Broadcast Update Event Type: null");
+                                    break;
+                                default:
+                                    UnaccountedFor($"Broadcast Update Event Type: {broadcastUpdate.Type}");
+                                    break;
+                            }
+                            return;
+                        case MessageTopic.Polls:
+                            var poll = msg.MessageData as PollsEvent;
+                            switch (poll?.Type)
+                            {
+                                case PollsEventType.PollCreate:
+                                    OnPollCreated?.Invoke(this, new OnPollEventArgs { ChannelId = poll.OwnedBy, PollId = poll.PollId, PollsEvent = poll });
+                                    return;
+                                case PollsEventType.PollUpdate:
+                                    OnPollUpdated?.Invoke(this, new OnPollEventArgs { ChannelId = poll.OwnedBy, PollId = poll.PollId, PollsEvent = poll });
+                                    return;
+                                case PollsEventType.PollComplete:
+                                    OnPollCompleted?.Invoke(this, new OnPollEventArgs { ChannelId = poll.OwnedBy, PollId = poll.PollId, PollsEvent = poll });
+                                    return;
+                                case PollsEventType.PollArchive:
+                                    OnPollArchived?.Invoke(this, new OnPollEventArgs { ChannelId = poll.OwnedBy, PollId = poll.PollId, PollsEvent = poll });
+                                    return;
+                                case PollsEventType.PollTerminate:
+                                    OnPollTerminated?.Invoke(this, new OnPollEventArgs { ChannelId = poll.OwnedBy, PollId = poll.PollId, PollsEvent = poll });
+                                    return;
+                                case null:
+                                    UnaccountedFor("Poll Event Type: null");
+                                    break;
+                                default:
+                                    UnaccountedFor($"Poll Event Type: {poll.Type}");
+                                    break;
+                            }
+                            return;
+                        case MessageTopic.Ads:
+                            var ads = msg.MessageData as AdsEvent;
+                            var adsChannelId = msg.Topic.Split('.')[1];
+                            switch (ads?.Type)
+                            {
+                                case AdsEventType.MidrollRequest:
+                                    OnAdsMidroll?.Invoke(this, new OnAdsEventArgs { ChannelId = adsChannelId, Type = ads.Type, Data = ads.Data });
+                                    return;
+                                case null:
+                                    UnaccountedFor("Ads Event Type: null");
+                                    break;
+                                default:
+                                    UnaccountedFor($"Ads Event Type: {ads.Type}");
+                                    break;
+                            }
+                            return;
+                        case MessageTopic.Raid:
                             var r = msg.MessageData as RaidEvents;
                             switch (r?.Type)
                             {
@@ -649,21 +913,43 @@ namespace TwitchLib.PubSub
                                     return;
                             }
                             return;
-                        case "predictions-channel-v1":
+                        case MessageTopic.PredictionsChannelV1:
                             var pred = msg.MessageData as PredictionEvents;
                             switch (pred?.Type)
                             {
                                 case PredictionType.EventCreated:
-                                    OnPrediction?.Invoke(this, new OnPredictionArgs { CreatedAt = pred.CreatedAt, Title = pred.Title, ChannelId = pred.ChannelId, EndedAt = pred.EndedAt, Id = pred.Id, Outcomes = pred.Outcomes, LockedAt = pred.LockedAt, PredictionTime = pred.PredictionTime, Status = pred.Status, WinningOutcomeId = pred.WinningOutcomeId, Type = pred.Type });
+                                    OnPredictionCreated?.Invoke(this, new OnPredictionArgs { Id = pred.Data.Event.Id, ChannelId = pred.Data.Event.ChannelId, Data = pred.Data, Type = pred.Type });
                                     return;
                                 case PredictionType.EventUpdated:
-                                    OnPrediction?.Invoke(this, new OnPredictionArgs { CreatedAt = pred.CreatedAt, Title = pred.Title, ChannelId = pred.ChannelId, EndedAt = pred.EndedAt, Id = pred.Id, Outcomes = pred.Outcomes, LockedAt = pred.LockedAt, PredictionTime = pred.PredictionTime, Status = pred.Status, WinningOutcomeId = pred.WinningOutcomeId, Type = pred.Type });
+                                    OnPredictionUpdated?.Invoke(this, new OnPredictionArgs { Id = pred.Data.Event.Id, ChannelId = pred.Data.Event.ChannelId, Data = pred.Data, Type = pred.Type });
                                     return;
                                 case null:
                                     UnaccountedFor("Prediction Type: null");
                                     break;
                                 default:
                                     UnaccountedFor($"Prediction Type: {pred.Type}");
+                                    break;
+                            }
+                            return;
+                        case MessageTopic.StreamChatRoomV1:
+                            var streamChat = msg.MessageData as StreamChatEvent;
+                            var streamChatChannelId = msg.Topic.Split('.')[1];
+                            switch (streamChat?.Type)
+                            {
+                                case StreamChatType.HostTargetChangeV2:
+                                    OnStreamChatHostTargetChange?.Invoke(this, new OnStreamChatHostTargetChange { ChannelId = streamChatChannelId, HostTargetChange = streamChat.HostTargetChange });
+                                    return;
+                                case StreamChatType.ChatRichEmbed:
+                                    OnStreamChatRichEmbed?.Invoke(this, new OnStreamChatRichEmbed { ChannelId = streamChatChannelId, ChatRichEmbed = streamChat.ChatRichEmbed });
+                                    return;
+                                case StreamChatType.UpdatedRoom:
+                                    OnStreamChatUpdatedRoom?.Invoke(this, new OnStreamChatUpdatedRoom { ChannelId = streamChatChannelId, UpdatedRoom = streamChat.UpdatedRoomData });
+                                    return;
+                                case null:
+                                    UnaccountedFor("Stream Chat Type: null");
+                                    break;
+                                default:
+                                    UnaccountedFor($"Stream Chat Type: {streamChat.Type}");
                                     break;
                             }
                             return;
@@ -767,7 +1053,7 @@ namespace TwitchLib.PubSub
         /// <param name="message">The message.</param>
         private void UnaccountedFor(string message)
         {
-            _logger?.LogInformation($"[TwitchPubSub] {message}");
+            _logger?.LogWarning($"[TwitchPubSub] Unaccount for: {message}");
         }
 
         #region Listeners
@@ -778,7 +1064,7 @@ namespace TwitchLib.PubSub
         /// <param name="channelId">The channel identifier.</param>
         public void ListenToFollows(string channelId)
         {
-            var topic = $"following.{channelId}";
+            var topic = $"{MessageTopic.Following}.{channelId}";
             _topicToChannelId[topic] = channelId;
             ListenToTopic(topic);
         }
@@ -791,14 +1077,14 @@ namespace TwitchLib.PubSub
         /// <param name="channelId">Channel ID who has previous parameter's moderator (can be fetched from TwitchApi)</param>
         public void ListenToChatModeratorActions(string userId, string channelId)
         {
-            var topic = $"chat_moderator_actions.{userId}.{channelId}";
+            var topic = $"{MessageTopic.ChatModeratorActions}.{userId}.{channelId}";
             _topicToChannelId[topic] = channelId;
             ListenToTopic(topic);
         }
 
         public void ListenToUserModerationNotifications(string myTwitchId, string channelTwitchId)
         {
-            var topic = $"user-moderation-notifications.{myTwitchId}.{channelTwitchId}";
+            var topic = $"{MessageTopic.UserModerationNotifications}.{myTwitchId}.{channelTwitchId}";
             _topicToChannelId[topic] = channelTwitchId;
             ListenToTopic(topic);
         }
@@ -811,7 +1097,7 @@ namespace TwitchLib.PubSub
         /// <param name="channelTwitchId">Channel ID who has previous parameter's moderator</param>
         public void ListenToAutomodQueue(string userTwitchId, string channelTwitchId)
         {
-            var topic = $"automod-queue.{userTwitchId}.{channelTwitchId}";
+            var topic = $"{MessageTopic.AutomodQueue}.{userTwitchId}.{channelTwitchId}";
             _topicToChannelId[topic] = channelTwitchId;
             ListenToTopic(topic);
         }
@@ -824,7 +1110,7 @@ namespace TwitchLib.PubSub
         /// <param name="extensionId">The extension identifier.</param>
         public void ListenToChannelExtensionBroadcast(string channelId, string extensionId)
         {
-            var topic = $"channel-ext-v1.{channelId}-{extensionId}-broadcast";
+            var topic = $"{MessageTopic.ChannelExtV1}.{channelId}-{extensionId}-broadcast";
             _topicToChannelId[topic] = channelId;
             ListenToTopic(topic);
         }
@@ -837,7 +1123,7 @@ namespace TwitchLib.PubSub
         [Obsolete("This topic is deprecated by Twitch. Please use ListenToBitsEventsV2()", false)]
         public void ListenToBitsEvents(string channelTwitchId)
         {
-            var topic = $"channel-bits-events-v1.{channelTwitchId}";
+            var topic = $"{MessageTopic.ChannelBitsEventsV1}.{channelTwitchId}";
             _topicToChannelId[topic] = channelTwitchId;
             ListenToTopic(topic);
         }
@@ -849,10 +1135,130 @@ namespace TwitchLib.PubSub
         /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
         public void ListenToBitsEventsV2(string channelTwitchId)
         {
-            var topic = $"channel-bits-events-v2.{channelTwitchId}";
+            var topic = $"{MessageTopic.ChannelBitsEventsV2}.{channelTwitchId}";
             _topicToChannelId[topic] = channelTwitchId;
             ListenToTopic(topic);
         }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="myTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        public void ListenToUserBitsEvents(string myTwitchId)
+        {
+            var topic = $"{MessageTopic.UserBitsUpdatesV1}.{myTwitchId}";
+            _topicToChannelId[topic] = myTwitchId;
+            ListenToTopic(topic);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        public void ListenToHypeTrain(string channelTwitchId)
+        {
+            var topic = $"{MessageTopic.HypeTrainEventsV1}.{channelTwitchId}";
+            _topicToChannelId[topic] = channelTwitchId;
+            ListenToTopic(topic);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        public void ListenToCreatorGoals(string channelTwitchId)
+        {
+            var topic = $"{MessageTopic.CreatorGoalsEventsV1}.{channelTwitchId}";
+            _topicToChannelId[topic] = channelTwitchId;
+            ListenToTopic(topic);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        public void ListenToCommunityBoost(string channelTwitchId)
+        {
+            var topic = $"{MessageTopic.CommunityBoostEventsV1}.{channelTwitchId}";
+            _topicToChannelId[topic] = channelTwitchId;
+            ListenToTopic(topic);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        public void ListenToDrops(string channelTwitchId)
+        {
+            var topic = $"{MessageTopic.ChannelDropEvents}.{channelTwitchId}";
+            _topicToChannelId[topic] = channelTwitchId;
+            ListenToTopic(topic);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        public void ListenToSubGifts(string channelTwitchId)
+        {
+            var topic = $"{MessageTopic.ChannelSubGiftsV1}.{channelTwitchId}";
+            _topicToChannelId[topic] = channelTwitchId;
+            ListenToTopic(topic);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        public void ListenToCheers(string channelTwitchId)
+        {
+            var topic = $"{MessageTopic.ChannelCheerEventsPublicV1}.{channelTwitchId}";
+            _topicToChannelId[topic] = channelTwitchId;
+            ListenToTopic(topic);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        public void ListenToBountyBoardEvents(string channelTwitchId)
+        {
+            var topic = $"{MessageTopic.ChannelBountyBoardEventsCTA}.{channelTwitchId}";
+            _topicToChannelId[topic] = channelTwitchId;
+            ListenToTopic(topic);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to bits events in specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel Id of channel to listen to bits on (can be fetched from TwitchApi)</param>
+        public void ListenToStreamChatRoom(string channelTwitchId)
+        {
+            var topic = $"{MessageTopic.StreamChatRoomV1}.{channelTwitchId}";
+            _topicToChannelId[topic] = channelTwitchId;
+            ListenToTopic(topic);
+        }
+
+        // /// <inheritdoc />
+        // /// <summary>
+        // /// Sends request to listenOn channel commerce events in specific channel
+        // /// </summary>
+        // /// <param name="channelTwitchId">Channel Id of channel to listen to commerce events on.</param>
+        // public void ListenToCommerce(string channelTwitchId)
+        // {
+        //     var topic = $"{MessageTopic.ChannelCommerceEventsV1}.{channelTwitchId}";
+        //     _topicToChannelId[topic] = channelTwitchId;
+        //     ListenToTopic(topic);
+        // }
 
         /// <inheritdoc />
         /// <summary>
@@ -861,7 +1267,7 @@ namespace TwitchLib.PubSub
         /// <param name="channelTwitchId">Id of channel to listen to playback events in.</param>
         public void ListenToVideoPlayback(string channelTwitchId)
         {
-            var topic = $"video-playback-by-id.{channelTwitchId}";
+            var topic = $"{MessageTopic.VideoPlaybackById}.{channelTwitchId}";
             _topicToChannelId[topic] = channelTwitchId;
             ListenToTopic(topic);
         }
@@ -870,11 +1276,11 @@ namespace TwitchLib.PubSub
         /// <summary>
         /// Sends request to listen to whispers from specific channel.
         /// </summary>
-        /// <param name="channelTwitchId">Channel to listen to whispers on.</param>
-        public void ListenToWhispers(string channelTwitchId)
+        /// <param name="userId">Channel to listen to whispers on.</param>
+        public void ListenToWhispers(string userId)
         {
-            var topic = $"whispers.{channelTwitchId}";
-            _topicToChannelId[topic] = channelTwitchId;
+            var topic = $"{MessageTopic.Whispers}.{userId}";
+            _topicToChannelId[topic] = userId;
             ListenToTopic(topic);
         }
 
@@ -886,7 +1292,7 @@ namespace TwitchLib.PubSub
         [Obsolete("This method listens to an undocumented/retired/obsolete topic. Consider using ListenToChannelPoints()", false)]
         public void ListenToRewards(string channelTwitchId)
         {
-            var topic = $"community-points-channel-v1.{channelTwitchId}";
+            var topic = $"{MessageTopic.CommunityPointsChannelV1}.{channelTwitchId}";
             _topicToChannelId[topic] = channelTwitchId;
             ListenToTopic(topic);
         }
@@ -898,7 +1304,7 @@ namespace TwitchLib.PubSub
         /// <param name="channelTwitchId">Channel to listen to rewards on.</param>
         public void ListenToChannelPoints(string channelTwitchId)
         {
-            var topic = $"channel-points-channel-v1.{channelTwitchId}";
+            var topic = $"{MessageTopic.ChannelPointsChannelV1}.{channelTwitchId}";
             _topicToChannelId[topic] = channelTwitchId;
             ListenToTopic(topic);
         }
@@ -910,8 +1316,8 @@ namespace TwitchLib.PubSub
         /// <param name="channelTwitchId">Channel to listen to leaderboards on.</param>
         public void ListenToLeaderboards(string channelTwitchId)
         {
-            var topicBits = $"leaderboard-events-v1.bits-usage-by-channel-v1-{channelTwitchId}-WEEK";
-            var topicSubs = $"leaderboard-events-v1.sub-gift-sent-{channelTwitchId}-WEEK";
+            var topicBits = $"{MessageTopic.LeaderboardEventsV1}.bits-usage-by-channel-v1-{channelTwitchId}-WEEK";
+            var topicSubs = $"{MessageTopic.LeaderboardEventsV1}.sub-gift-sent-{channelTwitchId}-WEEK";
             _topicToChannelId[topicBits] = channelTwitchId;
             _topicToChannelId[topicSubs] = channelTwitchId;
             ListenToTopics(topicBits, topicSubs);
@@ -924,9 +1330,207 @@ namespace TwitchLib.PubSub
         /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
         public void ListenToRaid(string channelTwitchId)
         {
-            var topicRaid = $"raid.{channelTwitchId}";
+            var topicRaid = $"{MessageTopic.Raid}.{channelTwitchId}";
             _topicToChannelId[topicRaid] = channelTwitchId;
             ListenToTopic(topicRaid);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToPoll(string channelTwitchId)
+        {
+            var topicPoll = $"{MessageTopic.Polls}.{channelTwitchId}";
+            _topicToChannelId[topicPoll] = channelTwitchId;
+            ListenToTopic(topicPoll);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToPresence(string userId)
+        {
+            var topicPoll = $"{MessageTopic.Presence}.{userId}";
+            _topicToChannelId[topicPoll] = userId;
+            ListenToTopic(topicPoll);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToAds(string channelId)
+        {
+            var topicAds = $"{MessageTopic.Ads}.{channelId}";
+            var topicAdProperties = $"{MessageTopic.AdPropertyRefresh}.{channelId}";
+            _topicToChannelId[topicAds] = channelId;
+            _topicToChannelId[topicAdProperties] = channelId;
+            ListenToTopics(topicAds, topicAdProperties);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToStreamChange(string channelId)
+        {
+            var topicPoll = $"{MessageTopic.StreamChangeByChannel}.{channelId}";
+            _topicToChannelId[topicPoll] = channelId;
+            ListenToTopic(topicPoll);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToBroadcastSettingsUpdate(string channelId)
+        {
+            var topicPoll = $"{MessageTopic.BroadcastSettingsUpdate}.{channelId}";
+            _topicToChannelId[topicPoll] = channelId;
+            ListenToTopic(topicPoll);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToWatchParty(string channelId)
+        {
+            var topicPoll = $"{MessageTopic.PvWatchPartyEvents}.{channelId}";
+            _topicToChannelId[topicPoll] = channelId;
+            ListenToTopic(topicPoll);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToExtensionControlByChannel(string channelId)
+        {
+            var topicPoll = $"{MessageTopic.ExtensionControl}.{channelId}";
+            _topicToChannelId[topicPoll] = channelId;
+            ListenToTopic(topicPoll);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToRadioEvents(string channelId)
+        {
+            var topicPoll = $"{MessageTopic.RadioEventsV1}.{channelId}";
+            _topicToChannelId[topicPoll] = channelId;
+            ListenToTopic(topicPoll);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToOnsiteNotifications(string userId)
+        {
+            var topicPoll = $"{MessageTopic.OnsiteNotifications}.{userId}";
+            _topicToChannelId[topicPoll] = userId;
+            ListenToTopic(topicPoll);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToUserProperties(string userId)
+        {
+            var topicProperties = $"{MessageTopic.UserPropertiesUpdate}.{userId}";
+            var topicPreferences = $"{MessageTopic.UserPreferencesUpdateV1}.{userId}";
+            _topicToChannelId[topicProperties] = userId;
+            _topicToChannelId[topicPreferences] = userId;
+            ListenToTopics(topicProperties, topicPreferences);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToUnbanRequests(string userId, string channelId)
+        {
+            var topicUserUnban = $"{MessageTopic.UserUnbanRequests}.{userId}.{channelId}";
+            var topicChannelUnban = $"{MessageTopic.ChannelUnbanRequests}.{userId}.{channelId}";
+            _topicToChannelId[topicUserUnban] = channelId;
+            _topicToChannelId[topicChannelUnban] = channelId;
+            ListenToTopics(topicUserUnban, topicChannelUnban);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToChatroomUser(string userId)
+        {
+            var topicPoll = $"{MessageTopic.ChatroomsUserV1}.{userId}";
+            _topicToChannelId[topicPoll] = userId;
+            ListenToTopic(topicPoll);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToLowTrustUsers(string userId, string channelId)
+        {
+            var topicPoll = $"{MessageTopic.LowTrustUsers}.{userId}.{channelId}";
+            _topicToChannelId[topicPoll] = channelId;
+            ListenToTopic(topicPoll);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToUserCampaignEvents(string userId)
+        {
+            var topicPoll = $"{MessageTopic.UserCampaignEvents}.{userId}";
+            _topicToChannelId[topicPoll] = userId;
+            ListenToTopic(topicPoll);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToCommunityMoments(string channelId)
+        {
+            var topicPoll = $"{MessageTopic.CommunityMomentsChannelV1}.{channelId}";
+            _topicToChannelId[topicPoll] = channelId;
+            ListenToTopic(topicPoll);
+        }
+
+        /// <inheritdoc />
+        /// <summary>
+        /// Sends request to listen to raids 'from' specific channel
+        /// </summary>
+        /// <param name="channelTwitchId">Channel to listen to raids get prepared on.</param>
+        public void ListenToPrivateCallout(string userId, string channelId)
+        {
+            var topicPoll = $"{MessageTopic.PrivateCallout}.{userId}.{channelId}";
+            _topicToChannelId[topicPoll] = channelId;
+            ListenToTopic(topicPoll);
         }
 
         /// <inheritdoc />
@@ -936,7 +1540,7 @@ namespace TwitchLib.PubSub
         /// <param name="channelId">Id of the channel to listen to.</param>
         public void ListenToSubscriptions(string channelId)
         {
-            var topic = $"channel-subscribe-events-v1.{channelId}";
+            var topic = $"{MessageTopic.ChannelSubscribeEventsV1}.{channelId}";
             _topicToChannelId[topic] = channelId;
             ListenToTopic(topic);
         }
@@ -948,7 +1552,7 @@ namespace TwitchLib.PubSub
         /// <param name="channelTwitchId"></param>
         public void ListenToPredictions(string channelTwitchId)
         {
-            var topic = $"predictions-channel-v1.{channelTwitchId}";
+            var topic = $"{MessageTopic.PredictionsChannelV1}.{channelTwitchId}";
             _topicToChannelId[topic] = channelTwitchId;
             ListenToTopic(topic);
         }
